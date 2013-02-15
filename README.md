@@ -19,7 +19,7 @@ LLVMで日本語プログラミング言語作れるのかなと思って試し�
     $ clang++ -emit-llvm -S print.cpp -o print.ll
     $ llvm-as print.ll
 
-### 開始
+### REPL開始
 
     $ ruby kaleidoscope_ja.rb
 
