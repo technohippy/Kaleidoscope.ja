@@ -4,6 +4,14 @@
 
 LLVMで日本語プログラミング言語作れるのかなと思って試しに[Kaleidoscope](http://llvm.org/docs/tutorial/)の予約語や識別子を日本語にしてみました。
 
+## ファイル説明
+
+ * README.md : 本ファイル
+ * kaleidoscope\_ja.rb : 日本語プログラミング言語
+ * compat\_ja.rb : C言語の関数を模擬
+ * print.cpp : 組み込み関数定義
+ * mandel.ksj : マンデルブロ表示プログラム（サンプル）
+
 ## 使い方
 
 ### 組み込み関数の準備
