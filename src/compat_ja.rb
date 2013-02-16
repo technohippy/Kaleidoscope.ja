@@ -1,6 +1,6 @@
 EOF = nil
 
-$buf = ARGF ? ARGF.read.split('') : []
+$buf = ARGV.empty? ? [] : ARGF.read.split('')
 def getchar
   $buf += ($stdin.gets || '').split('') if $buf.empty?
   $buf.shift

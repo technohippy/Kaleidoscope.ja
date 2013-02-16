@@ -7,25 +7,26 @@ LLVMで日本語プログラミング言語作れるのかなと思って試し�
 ## ファイル説明
 
  * README.md : 本ファイル
- * kaleidoscope\_ja.rb : 日本語プログラミング言語
- * compat\_ja.rb : C言語の関数を模擬
- * print.cpp : 組み込み関数定義
- * mandel.ksj : マンデルブロ表示プログラム（サンプル）
+ * bin/kaleidoscope : コマンド
+ * src/kaleidoscope\_ja.rb : 日本語プログラミング言語
+ * src/compat\_ja.rb : C言語の関数を模擬
+ * src/print.cpp : 組み込み関数定義
+ * sample/mandel.ksj : マンデルブロ表示プログラム（サンプル）
 
 ## 使い方
 
 ### 組み込み関数の準備
 
-    $ clang++ -emit-llvm -S print.cpp -o print.ll
+    $ clang++ -emit-llvm -S src/print.cpp -o print.ll
     $ llvm-as print.ll
 
 ### REPL開始
 
-    $ ruby kaleidoscope_ja.rb
+    $ bin/kaleidoscope
 
 ### サンプルの実行
 
-    $ ruby kaleidoscope_ja.rb mandel.ksj
+    $ bin/kaleidoscope sample/mandel.ksj
 
 ### サンプルの実行結果
 

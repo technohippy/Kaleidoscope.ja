@@ -918,4 +918,4 @@ module Toy
   end
 end
 
-Toy.main
+#Toy.main
