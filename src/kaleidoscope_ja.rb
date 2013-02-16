@@ -2,16 +2,26 @@
 require 'llvm/core'
 require 'llvm/execution_engine'
 require 'llvm/transforms/scalar'
-
 require "llvm/core"
 require 'llvm/transforms/ipo'
 require 'llvm/core/pass_manager'
+require 'digest/md5'
 require_relative './compat_ja'
 
 LLVM.init_x86
 
+class Object
+  def to_k
+    if %w(putchard printd).include? to_s # predefined functions
+      to_s
+    else
+      '_' + Digest::MD5.hexdigest(to_s)
+    end
+  end
+end
+
 # Error* - These are little helper functions for error handling.
-def Error  str; $stderr.print "Error: #{str}\n"; 0 end
+def Error  str; $stdout.print "Error: #{str}\n"; 0 end
 def ErrorP str; Error(str) end
 def ErrorF str; Error(str) end
 def ErrorV str; Error(str) end
@@ -549,7 +559,7 @@ module Toy
       operand_v = @operand.codegen
       return 0 if operand_v == 0
 
-      f = $TheModule.functions["unary#{@opcode}"]
+      f = $TheModule.functions["unary#{@opcode}".to_k]
       return ErrorV("Unknown unary operator: #{@opcode}") if f.nil?
 
       $Builder.call f, operand_v, 'unop'
@@ -574,7 +584,7 @@ module Toy
 
       # If it wasn't a builtin binary operator, it must be a user defined one. Emit
       # a call to it.
-      f = $TheModule.functions["binary#{@op}"]
+      f = $TheModule.functions["binary#{@op}".to_k]
       #assert(F && "binary operator not found!");
 
       ops = [l, r]
@@ -585,7 +595,7 @@ module Toy
   class CallExprAST
     def codegen
       # Look up the name in the global module table.
-      callee_f = $TheModule.functions[@callee]
+      callee_f = $TheModule.functions[@callee.to_k]
       return ErrorV("Unknown function referenced: #{@callee}") if callee_f == 0 or callee_f.nil?
 
       # If argument mismatch error.
@@ -741,7 +751,7 @@ module Toy
   class PrototypeAST
     def codegen
       # Make the function type:  double(double,double) etc.
-      $TheModule.functions.add(@name, [LLVM::Double] * @args.size, LLVM::Double) do |f, n|
+      $TheModule.functions.add(@name.to_k, [LLVM::Double] * @args.size, LLVM::Double) do |f, n|
         # If F conflicted, there was already something named 'Name'.  If it has a
         # body, don't allow redefinition or reextern.
         if f.name != @name
@@ -807,7 +817,7 @@ module Toy
   def self.HandleDefinition
     if f = ParseDefinition()
       if lf = f.codegen
-        $stderr.print 'Read function definition:'
+        $stdout.print 'Read function definition:'
         lf.dump
       end
     else
@@ -819,7 +829,7 @@ module Toy
   def self.HandleExtern
     if f = ParseExtern()
       if lf = f.codegen
-        $stderr.print 'Read extern:'
+        $stdout.print 'Read extern:'
         lf.dump
       end
     else
@@ -832,7 +842,7 @@ module Toy
     # Evaluate a top-level expression into an anonymous function.
     if f = ParseTopLevelExpr()
       if lf = f.codegen
-        $stderr.print 'Read top-level expression:'
+        $stdout.print 'Read top-level expression:'
         lf.dump
 
         # JIT the function, returning a function pointer.
@@ -840,7 +850,7 @@ module Toy
 
         # Cast it to the right type (takes no arguments, returns a double) so we
         # can call it as a native function.
-        $stderr.print "Evaluated to #{
+        $stdout.print "Evaluated to #{
           $TheExecutionEngine.run_function(lf).to_f(LLVM::Double)}\n"
       end
     else
@@ -851,7 +861,7 @@ module Toy
 
   def self.MainLoop
     loop do
-      $stderr.print 'ready> '
+      $stdout.print 'ready> '
       case $CurTok
         when TOK_EOF;    return
         when ';';        get_next_token # ignore top-level semicolons.
@@ -877,7 +887,7 @@ module Toy
     $BinopPrecedence['*'] = 40 # highest.
 
     # Prime the first token.
-    $stderr.print 'ready> '
+    $stdout.print 'ready> '
     get_next_token
 
     # Make the module, which holds all the code.
