@@ -12,11 +12,12 @@ LLVM.init_x86
 
 class Object
   def to_k
-    if %w(putchard printd).include? to_s # predefined functions
-      to_s
-    else
-      '_' + Digest::MD5.hexdigest(to_s)
-    end
+    #if %w(putchard printd).include? to_s # predefined functions
+    #  to_s
+    #else
+    #  '_' + Digest::MD5.hexdigest(to_s)
+    #end
+    to_s
   end
 end
 
@@ -549,7 +550,7 @@ module Toy
   class VariableExprAST
     def codegen
       # Look this variable up in the function.
-      v = $NamedValues[@name]
+      v = $NamedValues[@name.to_k]
       v ? v : ErrorV("Unknown variable name: #{@name}")
     end
   end
@@ -696,8 +697,8 @@ module Toy
 
       # Within the loop, the variable is defined equal to the PHI node.  If it
       # shadows an existing variable, we have to restore it, so save it now.
-      old_val = $NamedValues[@var_name]
-      $NamedValues[@var_name] = variable
+      old_val = $NamedValues[@var_name.to_k]
+      $NamedValues[@var_name.to_k] = variable
 
       # Emit the body of the loop.  This, like any other expr, can change the
       # current BB.  Note that we ignore the value computed by the body, but don't
@@ -738,9 +739,9 @@ module Toy
 
       # Restore the unshadowed variable.
       if old_val
-        $NamedValues[@var_name] = old_val
+        $NamedValues[@var_name.to_k] = old_val
       else
-        $NamedValues.delete @var_name
+        $NamedValues.delete @var_name.to_k
       end
 
       # for expr always returns 0.0.
@@ -762,9 +763,10 @@ module Toy
         @args.each_with_index do |arg, i|
           ai = f.params[i]
           ai.name = arg
+ai.name = arg.to_k
 
           # Add arguments to variable symbol table.
-          $NamedValues[arg] = ai
+          $NamedValues[arg.to_k] = ai
         end
 
         f
@@ -922,6 +924,7 @@ module Toy
     $TheFPM = 0
 
     # Print out all of the generated code.
+$stderr.print ">>>>>>>>>>>>>>>>>>>>>>>>>>> \n" 
     $TheModule.dump
 
     return 0;
